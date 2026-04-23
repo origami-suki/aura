@@ -6,7 +6,7 @@ import '../models/weather_daily.dart';
 import 'hourly_forecast_card.dart';
 import 'daily_forecast_card.dart';
 import 'details_grid.dart';
-import 'aqi_indices_section.dart';
+import 'aqi_section.dart';
 import 'location_bottom_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -61,9 +61,8 @@ class HomeScreen extends StatelessWidget {
                             todayForecast: state.dailyForecast.first,
                           ),
                         const SizedBox(height: 32),
-                        AqiAndIndicesSection(
+                        AqiSection(
                           aqiNow: state.aqiNow,
-                          indices: state.indices,
                         ),
                         const SizedBox(height: 100), // Bottom padding
                       ],
