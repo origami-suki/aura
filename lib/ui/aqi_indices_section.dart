@@ -115,6 +115,8 @@ class AqiAndIndicesSection extends StatelessWidget {
         color: Theme.of(context).colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(24),
       ),
+      // Adding padding around the entire list to match the AQI card's padding
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: ListView.separated(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -126,31 +128,46 @@ class AqiAndIndicesSection extends StatelessWidget {
         ),
         itemBuilder: (context, index) {
           final info = indices[index];
-          return ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: _getIconForIndexType(info.type),
-            title: Row(
+          return Padding(
+            // Replace ListTile's large default height/padding with custom padding
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(info.name, style: Theme.of(context).textTheme.bodyLarge),
-                const SizedBox(width: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondaryContainer,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    info.category,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 2.0),
+                  child: _getIconForIndexType(info.type),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(info.name, style: Theme.of(context).textTheme.bodyLarge),
+                          const SizedBox(width: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondaryContainer,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              info.category,
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSecondaryContainer,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(info.text, style: Theme.of(context).textTheme.bodyMedium),
+                    ],
                   ),
                 ),
               ],
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 4.0),
-              child: Text(info.text, style: Theme.of(context).textTheme.bodyMedium),
             ),
           );
         },
