@@ -76,10 +76,18 @@ class HomeScreen extends StatelessWidget {
   }
 
   SliverAppBar _buildAppBar(BuildContext context, String cityName) {
+    // When the app bar is scrolled under, give it a solid color that matches the top of the gradient background
+    // We blend the primary container color with the surface color to match the Container's gradient start.
+    final appBarColor = Color.alphaBlend(
+      Theme.of(context).colorScheme.primaryContainer.withAlpha(128),
+      Theme.of(context).colorScheme.surface,
+    );
+
     return SliverAppBar(
       pinned: true,
       floating: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: appBarColor,
+      surfaceTintColor: Colors.transparent, // Prevent material 3 scroll under tint
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.menu),
