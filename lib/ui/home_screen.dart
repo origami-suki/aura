@@ -109,31 +109,39 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildHeroSection(BuildContext context, WeatherNow now, DailyForecast today) {
-    return Column(
-      children: [
-        Text(
-          '${now.temp}°',
-          style: Theme.of(context).textTheme.displayLarge?.copyWith(
-            fontSize: 96,
-            fontWeight: FontWeight.w400,
-            letterSpacing: -2,
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            '${now.temp}°',
+            style: Theme.of(context).textTheme.displayLarge?.copyWith(
+              fontSize: 160,
+              fontWeight: FontWeight.w400,
+              letterSpacing: -2,
+              height: 1.0, // Reduce line height so it doesn't take too much vertical space
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Feels like ${now.feelsLike}°',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          const SizedBox(height: 8),
+          Text(
+            'Feels like ${now.feelsLike}°',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'High ${today.tempMax}° · Low ${today.tempMin}°',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          const SizedBox(height: 4),
+          Text(
+            'High ${today.tempMax}° · Low ${today.tempMin}°',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            textAlign: TextAlign.center,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
