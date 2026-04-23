@@ -3,17 +3,13 @@ class WeatherNow {
   final int feelsLike;
   final String condition;
   final String icon;
-  final double precip; // Precipitation in mm
-  final int windSpeed; // km/h
+  final double precip;
+  final int windSpeed;
   final String windDir;
-  final String sunrise;
-  final String sunset;
-  final int uvIndex;
-  final String uvDesc;
-  final double visibility; // km
-  final int humidity; // percentage
-  final int dewPoint; // degrees
-  final int pressure; // hPa
+  final double visibility;
+  final int humidity;
+  final int dewPoint;
+  final int pressure;
 
   WeatherNow({
     required this.temp,
@@ -23,10 +19,6 @@ class WeatherNow {
     required this.precip,
     required this.windSpeed,
     required this.windDir,
-    required this.sunrise,
-    required this.sunset,
-    required this.uvIndex,
-    required this.uvDesc,
     required this.visibility,
     required this.humidity,
     required this.dewPoint,
@@ -34,22 +26,21 @@ class WeatherNow {
   });
 
   factory WeatherNow.fromJson(Map<String, dynamic> json) {
+    // Note: API returns numbers as strings in the "now" object
+    final now = json['now'] as Map<String, dynamic>? ?? {};
+
     return WeatherNow(
-      temp: json['temp'] as int? ?? 0,
-      feelsLike: json['feels_like'] as int? ?? 0,
-      condition: json['condition'] as String? ?? '',
-      icon: json['icon'] as String? ?? '',
-      precip: (json['precip'] as num?)?.toDouble() ?? 0.0,
-      windSpeed: json['wind_speed'] as int? ?? 0,
-      windDir: json['wind_dir'] as String? ?? '',
-      sunrise: json['sunrise'] as String? ?? '',
-      sunset: json['sunset'] as String? ?? '',
-      uvIndex: json['uv_index'] as int? ?? 0,
-      uvDesc: json['uv_desc'] as String? ?? '',
-      visibility: (json['visibility'] as num?)?.toDouble() ?? 0.0,
-      humidity: json['humidity'] as int? ?? 0,
-      dewPoint: json['dew_point'] as int? ?? 0,
-      pressure: json['pressure'] as int? ?? 0,
+      temp: int.tryParse(now['temp']?.toString() ?? '') ?? 0,
+      feelsLike: int.tryParse(now['feelsLike']?.toString() ?? '') ?? 0,
+      condition: now['text']?.toString() ?? '',
+      icon: now['icon']?.toString() ?? '',
+      precip: double.tryParse(now['precip']?.toString() ?? '') ?? 0.0,
+      windSpeed: int.tryParse(now['windSpeed']?.toString() ?? '') ?? 0,
+      windDir: now['windDir']?.toString() ?? '',
+      visibility: double.tryParse(now['vis']?.toString() ?? '') ?? 0.0,
+      humidity: int.tryParse(now['humidity']?.toString() ?? '') ?? 0,
+      dewPoint: int.tryParse(now['dew']?.toString() ?? '') ?? 0,
+      pressure: int.tryParse(now['pressure']?.toString() ?? '') ?? 0,
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+
 class HourlyForecast {
   final String time; // e.g., "13:00"
   final String icon;
@@ -10,10 +12,19 @@ class HourlyForecast {
   });
 
   factory HourlyForecast.fromJson(Map<String, dynamic> json) {
+    String formattedTime = '';
+    try {
+      final fxTime = json['fxTime'] as String?;
+      if (fxTime != null) {
+        final dt = DateTime.parse(fxTime);
+        formattedTime = DateFormat('HH:mm').format(dt);
+      }
+    } catch (_) {}
+
     return HourlyForecast(
-      time: json['time'] as String? ?? '',
-      icon: json['icon'] as String? ?? '',
-      temp: json['temp'] as int? ?? 0,
+      time: formattedTime,
+      icon: json['icon']?.toString() ?? '',
+      temp: int.tryParse(json['temp']?.toString() ?? '') ?? 0,
     );
   }
 }

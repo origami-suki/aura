@@ -1,10 +1,15 @@
+import 'package:intl/intl.dart';
+
 class DailyForecast {
-  final String date; // e.g., "2023-10-27"
-  final String dayOfWeek; // e.g., "Mon"
+  final String date;
+  final String dayOfWeek;
   final int tempMax;
   final int tempMin;
   final String icon;
-  final int pop; // Probability of precipitation percentage
+  final int pop;
+  final String sunrise;
+  final String sunset;
+  final int uvIndex;
 
   DailyForecast({
     required this.date,
@@ -13,16 +18,40 @@ class DailyForecast {
     required this.tempMin,
     required this.icon,
     required this.pop,
+    required this.sunrise,
+    required this.sunset,
+    required this.uvIndex,
   });
 
   factory DailyForecast.fromJson(Map<String, dynamic> json) {
+    String formattedDate = '';
+    String dayOfWeek = '';
+
+    try {
+      final fxDate = json['fxDate'] as String?;
+      if (fxDate != null) {
+        final dt = DateTime.parse(fxDate);
+        formattedDate = DateFormat('MM/dd').format(dt);
+
+        // Simple day of week mapping
+        if (dt.day == DateTime.now().day && dt.month == DateTime.now().month) {
+          dayOfWeek = "Today";
+        } else {
+          dayOfWeek = DateFormat('EEE').format(dt);
+        }
+      }
+    } catch (_) {}
+
     return DailyForecast(
-      date: json['date'] as String? ?? '',
-      dayOfWeek: json['day_of_week'] as String? ?? '',
-      tempMax: json['temp_max'] as int? ?? 0,
-      tempMin: json['temp_min'] as int? ?? 0,
-      icon: json['icon'] as String? ?? '',
-      pop: json['pop'] as int? ?? 0,
+      date: formattedDate,
+      dayOfWeek: dayOfWeek,
+      tempMax: int.tryParse(json['tempMax']?.toString() ?? '') ?? 0,
+      tempMin: int.tryParse(json['tempMin']?.toString() ?? '') ?? 0,
+      icon: json['iconDay']?.toString() ?? '', // Using daytime icon
+      pop: int.tryParse(json['pop']?.toString() ?? '') ?? 0,
+      sunrise: json['sunrise']?.toString() ?? '',
+      sunset: json['sunset']?.toString() ?? '',
+      uvIndex: int.tryParse(json['uvIndex']?.toString() ?? '') ?? 0,
     );
   }
 }

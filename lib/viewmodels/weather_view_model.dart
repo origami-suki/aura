@@ -1,9 +1,9 @@
 import 'package:flutter/foundation.dart';
-import '../data/mock_repository.dart';
+import '../data/api_repository.dart';
 import 'weather_ui_state.dart';
 
 class WeatherViewModel extends ChangeNotifier {
-  final MockWeatherRepository _repository = MockWeatherRepository();
+  final ApiWeatherRepository _repository = ApiWeatherRepository();
   WeatherUiState _uiState = WeatherUiState();
 
   WeatherUiState get uiState => _uiState;
@@ -18,7 +18,7 @@ class WeatherViewModel extends ChangeNotifier {
 
     try {
       final location = await _repository.getLocation();
-      final locString = "${location.latitude},${location.longitude}";
+      final locString = "${location.longitude},${location.latitude}";
 
       // Fetch all data in parallel to avoid flashing and improve speed
       final results = await Future.wait([

@@ -7,10 +7,13 @@ import 'shapes/concentric_waves.dart';
 import 'shapes/gauge_chart.dart';
 import 'shapes/liquid_wave.dart';
 
+import '../models/weather_daily.dart';
+
 class DetailsStaggeredGrid extends StatelessWidget {
   final WeatherNow weather;
+  final DailyForecast todayForecast;
 
-  const DetailsStaggeredGrid({super.key, required this.weather});
+  const DetailsStaggeredGrid({super.key, required this.weather, required this.todayForecast});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +37,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
                 children: [
                   _buildPrecipitationCard(context),
                   const SizedBox(height: 16),
-                  _buildSunriseSunsetCard(context),
+                  _buildSunriseSunsetCard(context, todayForecast),
                   const SizedBox(height: 16),
                   _buildVisibilityCard(context),
                   const SizedBox(height: 16),
@@ -48,7 +51,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
                 children: [
                   _buildWindCard(context),
                   const SizedBox(height: 16),
-                  _buildUvIndexCard(context),
+                  _buildUvIndexCard(context, todayForecast),
                   const SizedBox(height: 16),
                   _buildPressureCard(context),
                 ],
@@ -150,7 +153,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildSunriseSunsetCard(BuildContext context) {
+  Widget _buildSunriseSunsetCard(BuildContext context, DailyForecast today) {
     return _buildCardBase(
       context,
       height: 160,
@@ -182,8 +185,8 @@ class DetailsStaggeredGrid extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Sunrise: ${weather.sunrise}", style: Theme.of(context).textTheme.labelSmall),
-                Text("Sunset: ${weather.sunset}", style: Theme.of(context).textTheme.labelSmall),
+                Text("Sunrise: ${today.sunrise}", style: Theme.of(context).textTheme.labelSmall),
+                Text("Sunset: ${today.sunset}", style: Theme.of(context).textTheme.labelSmall),
               ],
             ),
           ],
@@ -192,7 +195,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
     );
   }
 
-  Widget _buildUvIndexCard(BuildContext context) {
+  Widget _buildUvIndexCard(BuildContext context, DailyForecast today) {
     return _buildCardBase(
       context,
       height: 140,
@@ -221,16 +224,24 @@ class DetailsStaggeredGrid extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "${weather.uvIndex}",
+                  "${today.uvIndex}",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
-                Text(weather.uvDesc, style: Theme.of(context).textTheme.bodyMedium),
+                Text(_getUvDesc(today.uvIndex), style: Theme.of(context).textTheme.bodyMedium),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _getUvDesc(int uv) {
+    if (uv <= 2) return "Low";
+    if (uv <= 5) return "Moderate";
+    if (uv <= 7) return "High";
+    if (uv <= 10) return "Very High";
+    return "Extreme";
   }
 
   Widget _buildVisibilityCard(BuildContext context) {

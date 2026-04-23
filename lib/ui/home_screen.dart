@@ -55,8 +55,11 @@ class HomeScreen extends StatelessWidget {
                         const SizedBox(height: 32),
                         DailyForecastCard(dailyData: state.dailyForecast),
                         const SizedBox(height: 32),
-                        if (state.weatherNow != null)
-                          DetailsStaggeredGrid(weather: state.weatherNow!),
+                        if (state.weatherNow != null && state.dailyForecast.isNotEmpty)
+                          DetailsStaggeredGrid(
+                            weather: state.weatherNow!,
+                            todayForecast: state.dailyForecast.first,
+                          ),
                         const SizedBox(height: 32),
                         AqiAndIndicesSection(
                           aqiNow: state.aqiNow,

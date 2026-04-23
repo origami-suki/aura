@@ -8,18 +8,20 @@ class AqiNow {
   });
 
   factory AqiNow.fromJson(Map<String, dynamic> json) {
+    final now = json['now'] as Map<String, dynamic>? ?? {};
+
     return AqiNow(
-      aqi: json['aqi'] as int? ?? 0,
-      category: json['category'] as String? ?? 'Unknown',
+      aqi: int.tryParse(now['aqi']?.toString() ?? '') ?? 0,
+      category: now['category']?.toString() ?? 'Unknown',
     );
   }
 }
 
 class IndexInfo {
-  final String type; // e.g., "Dressing", "UV"
+  final String type;
   final String name;
-  final String category; // e.g., "Cold", "Strong"
-  final String text; // detailed advice
+  final String category;
+  final String text;
 
   IndexInfo({
     required this.type,
@@ -30,10 +32,10 @@ class IndexInfo {
 
   factory IndexInfo.fromJson(Map<String, dynamic> json) {
     return IndexInfo(
-      type: json['type'] as String? ?? '',
-      name: json['name'] as String? ?? '',
-      category: json['category'] as String? ?? '',
-      text: json['text'] as String? ?? '',
+      type: json['type']?.toString() ?? '',
+      name: json['name']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
+      text: json['text']?.toString() ?? '',
     );
   }
 }
