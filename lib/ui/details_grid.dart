@@ -91,7 +91,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              "\${weather.precip} mm",
+              "${weather.precip} mm",
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
@@ -132,12 +132,12 @@ class DetailsStaggeredGrid extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        "\${weather.windSpeed}",
+                        "${weather.windSpeed}",
                         style: Theme.of(context).textTheme.headlineLarge?.copyWith(fontWeight: FontWeight.bold),
                       ),
                       Text("km/h", style: Theme.of(context).textTheme.labelSmall),
                       const SizedBox(height: 4),
-                      Text("From \${weather.windDir}", style: Theme.of(context).textTheme.bodySmall),
+                      Text("From ${weather.windDir}", style: Theme.of(context).textTheme.bodySmall),
                     ],
                   ),
                 ),
@@ -182,8 +182,8 @@ class DetailsStaggeredGrid extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text("Sunrise: \${weather.sunrise}", style: Theme.of(context).textTheme.labelSmall),
-                Text("Sunset: \${weather.sunset}", style: Theme.of(context).textTheme.labelSmall),
+                Text("Sunrise: ${weather.sunrise}", style: Theme.of(context).textTheme.labelSmall),
+                Text("Sunset: ${weather.sunset}", style: Theme.of(context).textTheme.labelSmall),
               ],
             ),
           ],
@@ -221,7 +221,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "\${weather.uvIndex}",
+                  "${weather.uvIndex}",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(weather.uvDesc, style: Theme.of(context).textTheme.bodyMedium),
@@ -265,7 +265,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "\${weather.visibility} km",
+                  "${weather.visibility} km",
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ],
@@ -312,7 +312,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
             const SizedBox(height: 8),
             Center(
               child: Text(
-                "\${weather.pressure} hPa",
+                "${weather.pressure} hPa",
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
             ),
@@ -350,11 +350,11 @@ class DetailsStaggeredGrid extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  "\${weather.humidity}%",
+                  "${weather.humidity}%",
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
                 ),
                 Text(
-                  "Dew point \${weather.dewPoint}°",
+                  "Dew point ${weather.dewPoint}°",
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],

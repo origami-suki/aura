@@ -18,7 +18,7 @@ class WeatherViewModel extends ChangeNotifier {
 
     try {
       final location = await _repository.getLocation();
-      final locString = "\${location.latitude},\${location.longitude}";
+      final locString = "${location.latitude},${location.longitude}";
 
       // Fetch all data in parallel to avoid flashing and improve speed
       final results = await Future.wait([
@@ -41,7 +41,7 @@ class WeatherViewModel extends ChangeNotifier {
     } catch (e) {
       _uiState = _uiState.copyWith(
         isLoading: false,
-        errorMessage: "Failed to load weather data: \$e",
+        errorMessage: "Failed to load weather data: $e",
       );
     }
     notifyListeners();

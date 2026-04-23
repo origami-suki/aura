@@ -112,7 +112,7 @@ class HomeScreen extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '\${now.temp}°',
+          '${now.temp}°',
           style: Theme.of(context).textTheme.displayLarge?.copyWith(
             fontSize: 96,
             fontWeight: FontWeight.w400,
@@ -121,14 +121,14 @@ class HomeScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Feels like \${now.feelsLike}°',
+          'Feels like ${now.feelsLike}°',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 4),
         Text(
-          'High \${today.tempMax}° · Low \${today.tempMin}°',
+          'High ${today.tempMax}° · Low ${today.tempMin}°',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),

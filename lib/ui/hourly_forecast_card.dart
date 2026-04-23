@@ -47,7 +47,7 @@ class HourlyForecastCard extends StatelessWidget {
                     ),
                     Icon(_getIconForCondition(forecast.icon)),
                     Text(
-                      '\${forecast.temp}°',
+                      '${forecast.temp}°',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

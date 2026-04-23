@@ -71,7 +71,7 @@ class AqiAndIndicesSection extends StatelessWidget {
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
-                "\${aqi.aqi}",
+                "${aqi.aqi}",
                 style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 12),

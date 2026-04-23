@@ -55,7 +55,7 @@ class DailyForecastCard extends StatelessWidget {
                     Icon(_getIconForCondition(forecast.icon)),
                     if (forecast.pop > 0)
                       Text(
-                        '\${forecast.pop}%',
+                        '${forecast.pop}%',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -64,13 +64,13 @@ class DailyForecastCard extends StatelessWidget {
                     Column(
                       children: [
                         Text(
-                          '\${forecast.tempMax}°',
+                          '${forecast.tempMax}°',
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
-                          '\${forecast.tempMin}°',
+                          '${forecast.tempMin}°',
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
