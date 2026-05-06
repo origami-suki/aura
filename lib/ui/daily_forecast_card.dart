@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/weather_daily.dart';
+import '../utils/weather_icons.dart';
 
 class DailyForecastCard extends StatelessWidget {
   final List<DailyForecast> dailyData;
@@ -52,7 +53,7 @@ class DailyForecastCard extends StatelessWidget {
                         fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
-                    Icon(_getIconForCondition(forecast.icon)),
+                    Icon(getIconForCondition(forecast.icon)),
                     if (forecast.pop > 0)
                       Text(
                         '${forecast.pop}%',
@@ -85,20 +86,5 @@ class DailyForecastCard extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  IconData _getIconForCondition(String iconName) {
-    switch (iconName.toLowerCase()) {
-      case 'sunny':
-        return Icons.wb_sunny;
-      case 'cloudy':
-        return Icons.cloud;
-      case 'partly_cloudy':
-        return Icons.wb_cloudy;
-      case 'rain':
-        return Icons.water_drop;
-      default:
-        return Icons.cloud;
-    }
   }
 }

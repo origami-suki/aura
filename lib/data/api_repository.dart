@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import '../config/app_config.dart';
 import '../models/location.dart';
 import '../models/weather_now.dart';
 import '../models/weather_hourly.dart';
@@ -10,7 +11,6 @@ import '../models/weather_daily.dart';
 import '../models/indices.dart';
 
 class ApiWeatherRepository {
-  static const String baseUrl = 'http://101.201.52.78:8000/api/v1';
   final http.Client _client = http.Client();
   String? _deviceId;
 
@@ -38,10 +38,10 @@ class ApiWeatherRepository {
 
   Future<LocationResponse> getLocation() async {
     final headers = await _getHeaders();
-    final response = await _client.get(Uri.parse('$baseUrl/user/location'), headers: headers);
+    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/user/location'), headers: headers);
 
     if (response.statusCode == 200) {
-      return LocationResponse.fromJson(jsonDecode(response.body));
+      return LocationResponse.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
     } else if (response.statusCode == 404) {
       // If no location found, save a default one and retry
       await saveLocation(longitude: -74.0060, latitude: 40.7128, cityName: "New York");
@@ -60,7 +60,7 @@ class ApiWeatherRepository {
     });
 
     final response = await _client.post(
-      Uri.parse('$baseUrl/user/location'),
+      Uri.parse('${AppConfig.apiBaseUrl}/user/location'),
       headers: headers,
       body: body,
     );
@@ -71,7 +71,7 @@ class ApiWeatherRepository {
   }
 
   Future<WeatherNow> getWeatherNow(String location) async {
-    final response = await _client.get(Uri.parse('$baseUrl/weather/now?location=$location&lang=en&unit=m'));
+    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/weather/now?location=$location&lang=en&unit=m'));
     if (response.statusCode == 200) {
       return WeatherNow.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
     }
@@ -79,7 +79,7 @@ class ApiWeatherRepository {
   }
 
   Future<List<HourlyForecast>> getHourlyForecast(String location) async {
-    final response = await _client.get(Uri.parse('$baseUrl/weather/hourly?location=$location&lang=en&unit=m'));
+    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/weather/hourly?location=$location&lang=en&unit=m'));
     if (response.statusCode == 200) {
       final json = jsonDecode(utf8.decode(response.bodyBytes));
       final List<dynamic> hourlyJson = json['hourly'] ?? [];
@@ -89,7 +89,7 @@ class ApiWeatherRepository {
   }
 
   Future<List<DailyForecast>> getDailyForecast(String location) async {
-    final response = await _client.get(Uri.parse('$baseUrl/weather/daily?location=$location&lang=en&unit=m'));
+    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/weather/daily?location=$location&lang=en&unit=m'));
     if (response.statusCode == 200) {
       final json = jsonDecode(utf8.decode(response.bodyBytes));
       final List<dynamic> dailyJson = json['daily'] ?? [];
@@ -99,7 +99,7 @@ class ApiWeatherRepository {
   }
 
   Future<AqiNow> getAqiNow(String location) async {
-    final response = await _client.get(Uri.parse('$baseUrl/aqi/now?location=$location&lang=en'));
+    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/aqi/now?location=$location&lang=en'));
     if (response.statusCode == 200) {
       return AqiNow.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
     }
@@ -108,15 +108,16 @@ class ApiWeatherRepository {
 
   Future<List<IndexInfo>> getIndices(String location) async {
     // 0 = all indices
-    final response = await _client.get(Uri.parse('$baseUrl/indices?location=$location&type=0&lang=en'));
+    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/indices?location=$location&type=0&lang=en'));
     if (response.statusCode == 200) {
       final json = jsonDecode(utf8.decode(response.bodyBytes));
       final List<dynamic> indicesJson = json['daily'] ?? [];
-
-      // Filter out only the ones we specifically want if needed, or return all.
-      // E.g., dressing (3), sports (1), UV (5)
       return indicesJson.map((e) => IndexInfo.fromJson(e)).toList();
     }
     throw Exception('Failed to load indices');
+  }
+
+  void dispose() {
+    _client.close();
   }
 }

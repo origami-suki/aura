@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/weather_hourly.dart';
+import '../utils/weather_icons.dart';
 
 class HourlyForecastCard extends StatelessWidget {
   final List<HourlyForecast> hourlyData;
@@ -45,7 +46,7 @@ class HourlyForecastCard extends StatelessWidget {
                       forecast.time,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    Icon(_getIconForCondition(forecast.icon)),
+                    Icon(getIconForCondition(forecast.icon)),
                     Text(
                       '${forecast.temp}°',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -60,21 +61,5 @@ class HourlyForecastCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  // A helper function to map string conditions to material icons
-  IconData _getIconForCondition(String iconName) {
-    switch (iconName.toLowerCase()) {
-      case 'sunny':
-        return Icons.wb_sunny;
-      case 'cloudy':
-        return Icons.cloud;
-      case 'partly_cloudy':
-        return Icons.wb_cloudy;
-      case 'rain':
-        return Icons.water_drop;
-      default:
-        return Icons.cloud;
-    }
   }
 }

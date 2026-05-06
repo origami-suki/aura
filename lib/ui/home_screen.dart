@@ -24,7 +24,23 @@ class HomeScreen extends StatelessWidget {
           }
 
           if (state.errorMessage != null) {
-            return Center(child: Text(state.errorMessage!));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(state.errorMessage!, textAlign: TextAlign.center),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => viewModel.loadWeatherData(),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text("Retry"),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
 
           return Container(

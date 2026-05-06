@@ -57,8 +57,9 @@ class _LocationBottomSheetState extends State<LocationBottomSheet> {
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),
-          Expanded(
+          Flexible(
             child: ListView.separated(
+              shrinkWrap: true,
               itemCount: _savedLocations.length,
               separatorBuilder: (context, index) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
