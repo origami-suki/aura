@@ -26,7 +26,7 @@ class AuraWeatherApp extends StatelessWidget {
     final themeMode = context.watch<ThemeModeController>().themeMode;
 
     return MaterialApp(
-      title: 'Aura Weather',
+      title: 'Aura',
       theme: _buildTheme(Brightness.light),
       darkTheme: _buildTheme(Brightness.dark),
       themeMode: themeMode,
