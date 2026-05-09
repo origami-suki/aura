@@ -221,15 +221,28 @@ sequenceDiagram
 
 ### 6.1 配置
 
-API base URL 位于 `lib/config/app_config.dart`：
+API base URL 位于 `lib/config/app_config.dart`，通过 Dart 编译时环境变量注入：
 
 ```dart
-static const String apiBaseUrl = 'http://0.0.0.0:8000/api/v1';
+static final String apiBaseUrl = _loadApiBaseUrl();
+// 内部使用 String.fromEnvironment('AURA_API_BASE_URL')
+// 未设置时抛出 StateError
 ```
 
-所有 Repository 请求都通过 `${AppConfig.apiBaseUrl}` 拼接。
+本地开发时，从示例文件复制并编辑 `.env.json`，然后通过 `--dart-define-from-file` 注入：
 
-扩展环境配置时，可以考虑把 `apiBaseUrl` 改为按 build flavor、dart define 或运行环境注入，但当前实现是静态常量。
+```bash
+cp .env.example.json .env.json   # 编辑其中的 URL
+flutter run --dart-define-from-file=.env.json
+```
+
+也可以单次注入：
+
+```bash
+flutter run --dart-define=AURA_API_BASE_URL=<api-base-url>
+```
+
+`.env.json` 已在 `.gitignore` 中，不会提交到仓库。所有 Repository 请求仍通过 `${AppConfig.apiBaseUrl}` 拼接。
 
 ### 6.2 设备 ID 和请求头
 
@@ -672,7 +685,7 @@ main.dart
 2. 位置搜索提交和地点点击都只关闭弹窗，尚未触发真实保存或刷新。
 3. `WeatherUiState.indices` 已存在，但生活指数没有对应 UI 展示。
 4. `SineWavePainter` 的太阳进度在 details grid 中固定为 `0.6`，不是根据当前时间计算。
-5. `AppConfig.apiBaseUrl` 是硬编码本地地址。
+5. `AppConfig.apiBaseUrl` 需要通过 `--dart-define-from-file` 或 `--dart-define` 注入，未设置时会抛出 `StateError`。
 6. 当前没有 `test/` 目录，尚未观察到 Dart 或 Flutter widget tests。
 7. 当前没有抽象 Repository interface，ViewModel 直接实例化 `ApiWeatherRepository`，这会增加单元测试替换依赖的成本。
 8. `copyWith` 对 nullable 字段清空不友好，后续复杂状态流可能需要调整。
