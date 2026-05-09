@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/indices.dart';
+import 'weather_effects.dart';
 
 class AqiSection extends StatelessWidget {
   final AqiNow? aqiNow;
@@ -13,61 +14,62 @@ class AqiSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            "Air Quality",
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        const SizedBox(height: 16),
+        const SectionHeader("Air Quality"),
+        const SizedBox(height: AuraSpacing.md),
         _buildAqiCard(context, aqiNow!),
-        const SizedBox(height: 24),
+        const SizedBox(height: AuraSpacing.xl),
       ],
     );
   }
 
   Widget _buildAqiCard(BuildContext context, AqiNow aqi) {
     Color getAqiColor(int aqiValue) {
-      if (aqiValue <= 50) return Colors.green;
-      if (aqiValue <= 100) return Colors.yellow.shade700;
-      if (aqiValue <= 150) return Colors.orange;
-      if (aqiValue <= 200) return Colors.red;
-      return Colors.purple;
+      final colorScheme = Theme.of(context).colorScheme;
+      if (aqiValue <= 50) return colorScheme.tertiary;
+      if (aqiValue <= 100) return colorScheme.primary;
+      if (aqiValue <= 150) return colorScheme.secondary;
+      if (aqiValue <= 200) return colorScheme.error;
+      return colorScheme.inversePrimary;
     }
 
-    return Container(
+    return WeatherSurfaceCard(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AuraSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               const Icon(Icons.air, size: 20),
-              const SizedBox(width: 8),
-              Text("AQI Now", style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(width: AuraSpacing.xs),
+              Text(
+                "AQI Now",
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AuraSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 "${aqi.aqi}",
-                style: Theme.of(context).textTheme.displayMedium?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: AuraSpacing.sm),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AuraSpacing.sm,
+                  vertical: AuraSpacing.xxs,
+                ),
                 decoration: BoxDecoration(
                   color: getAqiColor(aqi.aqi).withAlpha(51),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(AuraRadii.chip),
                 ),
                 child: Row(
                   children: [
@@ -79,7 +81,7 @@ class AqiSection extends StatelessWidget {
                         shape: BoxShape.circle,
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: AuraSpacing.xs),
                     Text(
                       aqi.category,
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(

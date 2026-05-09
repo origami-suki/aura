@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/weather_hourly.dart';
 import '../utils/weather_icons.dart' show getWeatherIcon;
+import 'weather_effects.dart';
 
 class HourlyForecastCard extends StatelessWidget {
   final List<HourlyForecast> hourlyData;
@@ -11,32 +12,31 @@ class HourlyForecastCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (hourlyData.isEmpty) return const SizedBox.shrink();
 
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      padding: const EdgeInsets.all(16),
+    return WeatherSurfaceCard(
+      padding: const EdgeInsets.all(AuraSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               const Icon(Icons.access_time, size: 18),
-              const SizedBox(width: 8),
+              const SizedBox(width: AuraSpacing.xs),
               Text(
                 "Hourly forecast",
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AuraSpacing.md),
           SizedBox(
             height: 100,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: hourlyData.length,
-              separatorBuilder: (context, index) => const SizedBox(width: 24),
+              separatorBuilder: (context, index) =>
+                  const SizedBox(width: AuraSpacing.xl),
               itemBuilder: (context, index) {
                 final forecast = hourlyData[index];
                 return Column(
