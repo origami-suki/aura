@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../models/location.dart';
 import '../viewmodels/weather_view_model.dart';
+import 'weather_effects.dart';
 
 class LocationBottomSheet extends StatefulWidget {
   const LocationBottomSheet({super.key});
@@ -70,14 +71,23 @@ class _LocationBottomSheetState extends State<LocationBottomSheet> {
         maxHeight: MediaQuery.of(context).size.height * 0.82,
       ),
       padding: EdgeInsets.only(
-        top: 12,
-        left: 16,
-        right: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
+        top: AuraSpacing.sm,
+        left: AuraSpacing.md,
+        right: AuraSpacing.md,
+        bottom: MediaQuery.of(context).viewInsets.bottom + AuraSpacing.md,
       ),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [colorScheme.surfaceContainerLow, colorScheme.surface],
+        ),
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(AuraRadii.sheet),
+        ),
+        border: Border(
+          top: BorderSide(color: colorScheme.outlineVariant.withAlpha(128)),
+        ),
       ),
       child: Consumer<WeatherViewModel>(
         builder: (context, viewModel, child) {
@@ -90,21 +100,21 @@ class _LocationBottomSheetState extends State<LocationBottomSheet> {
               Center(
                 child: Container(
                   width: 40,
-                  height: 4,
+                  height: AuraSpacing.xxs,
                   decoration: BoxDecoration(
                     color: colorScheme.onSurfaceVariant.withAlpha(102),
-                    borderRadius: BorderRadius.circular(999),
+                    borderRadius: BorderRadius.circular(AuraRadii.full),
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AuraSpacing.lg),
               Text(
                 'Choose location',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AuraSpacing.md),
               TextField(
                 controller: _searchController,
                 autofocus: true,
@@ -113,7 +123,7 @@ class _LocationBottomSheetState extends State<LocationBottomSheet> {
                   prefixIcon: const Icon(Icons.search),
                   suffixIcon: state.isSearchingCities
                       ? const Padding(
-                          padding: EdgeInsets.all(14),
+                          padding: EdgeInsets.all(AuraSpacing.sm),
                           child: SizedBox(
                             width: 18,
                             height: 18,
@@ -122,17 +132,30 @@ class _LocationBottomSheetState extends State<LocationBottomSheet> {
                         )
                       : null,
                   filled: true,
-                  fillColor: colorScheme.surfaceContainerHigh,
+                  fillColor: colorScheme.surfaceContainerHighest,
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
+                    borderRadius: BorderRadius.circular(AuraRadii.card),
+                    borderSide: BorderSide(color: colorScheme.outlineVariant),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AuraRadii.card),
+                    borderSide: BorderSide(
+                      color: colorScheme.outlineVariant.withAlpha(136),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AuraRadii.card),
+                    borderSide: BorderSide(
+                      color: colorScheme.primary,
+                      width: 1.4,
+                    ),
                   ),
                 ),
                 textInputAction: TextInputAction.search,
                 onChanged: _onSearchChanged,
                 onSubmitted: _onSearchChanged,
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: AuraSpacing.lg),
               Flexible(child: _buildSearchBody(context, viewModel)),
             ],
           );
@@ -180,7 +203,8 @@ class _LocationBottomSheetState extends State<LocationBottomSheet> {
     return ListView.separated(
       shrinkWrap: true,
       itemCount: state.citySearchResults.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AuraSpacing.sm),
       itemBuilder: (context, index) {
         final result = state.citySearchResults[index];
         return _CityResultTile(
@@ -217,13 +241,10 @@ class _CityResultTile extends StatelessWidget {
 
     return InkWell(
       onTap: isSelecting ? null : onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainer,
-          borderRadius: BorderRadius.circular(20),
-        ),
+      borderRadius: BorderRadius.circular(AuraRadii.tile),
+      child: WeatherSurfaceCard(
+        padding: const EdgeInsets.all(AuraSpacing.md),
+        borderRadius: AuraRadii.tile,
         child: Row(
           children: [
             Container(
@@ -231,14 +252,14 @@ class _CityResultTile extends StatelessWidget {
               height: 44,
               decoration: BoxDecoration(
                 color: colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AuraRadii.icon),
               ),
               child: Icon(
                 Icons.location_on_outlined,
                 color: colorScheme.onPrimaryContainer,
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AuraSpacing.sm),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +268,7 @@ class _CityResultTile extends StatelessWidget {
                     result.name,
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AuraSpacing.xxs),
                   Text(
                     result.displayName,
                     maxLines: 1,
@@ -259,7 +280,7 @@ class _CityResultTile extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: AuraSpacing.sm),
             if (isSelecting)
               const SizedBox(
                 width: 20,
@@ -290,24 +311,23 @@ class _MessageState extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return Container(
+    return WeatherSurfaceCard(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(24),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AuraSpacing.xl,
+        vertical: AuraSpacing.xxl,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 32, color: colorScheme.primary),
-          const SizedBox(height: 12),
+          const SizedBox(height: AuraSpacing.sm),
           Text(
             title,
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AuraSpacing.xs),
           Text(
             subtitle,
             textAlign: TextAlign.center,
