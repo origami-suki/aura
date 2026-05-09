@@ -47,9 +47,9 @@ class ApiWeatherRepository {
     } else if (response.statusCode == 404) {
       // If no location found, save a default one and retry
       await saveLocation(
-        longitude: -74.0060,
-        latitude: 40.7128,
-        cityName: "New York",
+        longitude: 108.9398,
+        latitude: 34.3416,
+        cityName: '西安',
       );
       return getLocation();
     } else {
@@ -82,7 +82,7 @@ class ApiWeatherRepository {
 
   Future<List<CitySearchResult>> searchCity(
     String query, {
-    String lang = 'en',
+    String lang = 'zh',
   }) async {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isEmpty) return [];
@@ -108,7 +108,7 @@ class ApiWeatherRepository {
   Future<WeatherNow> getWeatherNow(String location) async {
     final response = await _client.get(
       Uri.parse(
-        '${AppConfig.apiBaseUrl}/weather/now?location=$location&lang=en&unit=m',
+        '${AppConfig.apiBaseUrl}/weather/now?location=$location&lang=zh&unit=m',
       ),
     );
     if (response.statusCode == 200) {
@@ -120,7 +120,7 @@ class ApiWeatherRepository {
   Future<List<HourlyForecast>> getHourlyForecast(String location) async {
     final response = await _client.get(
       Uri.parse(
-        '${AppConfig.apiBaseUrl}/weather/hourly?location=$location&lang=en&unit=m',
+        '${AppConfig.apiBaseUrl}/weather/hourly?location=$location&lang=zh&unit=m',
       ),
     );
     if (response.statusCode == 200) {
@@ -134,7 +134,7 @@ class ApiWeatherRepository {
   Future<List<DailyForecast>> getDailyForecast(String location) async {
     final response = await _client.get(
       Uri.parse(
-        '${AppConfig.apiBaseUrl}/weather/daily?location=$location&lang=en&unit=m',
+        '${AppConfig.apiBaseUrl}/weather/daily?location=$location&lang=zh&unit=m',
       ),
     );
     if (response.statusCode == 200) {
@@ -147,7 +147,7 @@ class ApiWeatherRepository {
 
   Future<AqiNow> getAqiNow(String location) async {
     final response = await _client.get(
-      Uri.parse('${AppConfig.apiBaseUrl}/aqi/now?location=$location&lang=en'),
+      Uri.parse('${AppConfig.apiBaseUrl}/aqi/now?location=$location&lang=zh'),
     );
     if (response.statusCode == 200) {
       return AqiNow.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
@@ -159,7 +159,7 @@ class ApiWeatherRepository {
     // 0 = all indices
     final response = await _client.get(
       Uri.parse(
-        '${AppConfig.apiBaseUrl}/indices?location=$location&type=0&lang=en',
+        '${AppConfig.apiBaseUrl}/indices?location=$location&type=0&lang=zh',
       ),
     );
     if (response.statusCode == 200) {

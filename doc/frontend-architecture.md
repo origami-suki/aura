@@ -263,9 +263,9 @@ Repository 内部维护 `_deviceId` 缓存：
 
 位置默认逻辑：
 
-1. `getLocation()` 遇到 404 时，会调用 `saveLocation(longitude: -74.0060, latitude: 40.7128, cityName: "New York")`。
+1. `getLocation()` 遇到 404 时，会调用 `saveLocation(longitude: 108.9398, latitude: 34.3416, cityName: "西安")`。
 2. 保存默认位置后再次递归调用 `getLocation()`。
-3. 这意味着新设备默认城市是 New York。
+3. 这意味着新设备默认城市是西安。
 
 请求和响应处理特点：
 
@@ -273,7 +273,7 @@ Repository 内部维护 `_deviceId` 缓存：
 2. 只有 HTTP 200 被视为成功。
 3. 失败时抛出 `Exception`，由 ViewModel 的 `_tryFetch` 或外层 `try/catch` 处理。
 4. `dispose()` 调用 `_client.close()`，由 `WeatherViewModel.dispose()` 触发。
-5. 天气、AQI 和生活指数请求当前硬编码 `lang=en`，天气请求还硬编码 `unit=m`。`openapi.json` 中这些 query 参数是可选项，默认语言为 `zh`，后续如果增加语言或单位设置，需要把这些值从用户偏好或系统 locale 传入 Repository。
+5. 天气、AQI、生活指数和城市搜索请求当前默认使用 `lang=zh`，天气请求还硬编码 `unit=m`。`openapi.json` 中这些 query 参数是可选项，默认语言为 `zh`，后续如果增加语言或单位设置，需要把这些值从用户偏好或系统 locale 传入 Repository。
 
 新增 API 的推荐步骤：
 
@@ -677,7 +677,7 @@ main.dart
 7. 当前没有抽象 Repository interface，ViewModel 直接实例化 `ApiWeatherRepository`，这会增加单元测试替换依赖的成本。
 8. `copyWith` 对 nullable 字段清空不友好，后续复杂状态流可能需要调整。
 9. 天气接口请求没有附带 `X-Device-ID`，只有位置接口使用设备 ID 请求头。是否需要统一取决于后端契约。
-10. 天气、AQI 和生活指数请求硬编码 `lang=en`，天气请求硬编码 `unit=m`，尚未接入系统语言、用户单位偏好或设置页。
+10. 天气、AQI、生活指数和城市搜索请求默认使用 `lang=zh`，天气请求硬编码 `unit=m`，尚未接入系统语言、用户单位偏好或设置页。
 11. `BlobShapeCard` 当前未使用，属于可清理的死代码或待接入的视觉封装。
 
 ## 15. 验证和维护清单

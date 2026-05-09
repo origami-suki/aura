@@ -77,7 +77,7 @@ class WeatherViewModel extends ChangeNotifier {
     }
   }
 
-  Future<void> searchCities(String query, {String lang = 'en'}) async {
+  Future<void> searchCities(String query, {String lang = 'zh'}) async {
     final trimmedQuery = query.trim();
     final requestId = ++_citySearchRequestId;
 
