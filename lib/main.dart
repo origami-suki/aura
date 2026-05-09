@@ -35,11 +35,14 @@ class AuraWeatherApp extends StatelessWidget {
   }
 
   ThemeData _buildTheme(Brightness brightness) {
-    final colorScheme = ColorScheme.fromSeed(
+    final baseColorScheme = ColorScheme.fromSeed(
       seedColor: _weatherSeed,
       brightness: brightness,
       dynamicSchemeVariant: DynamicSchemeVariant.tonalSpot,
     );
+    final colorScheme = brightness == Brightness.light
+        ? _buildLightSurfaceScheme(baseColorScheme)
+        : baseColorScheme;
 
     return ThemeData(
       colorScheme: colorScheme,
@@ -58,6 +61,19 @@ class AuraWeatherApp extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         ),
       ),
+    );
+  }
+
+  ColorScheme _buildLightSurfaceScheme(ColorScheme colorScheme) {
+    return colorScheme.copyWith(
+      surface: const Color(0xFFF4F7FB),
+      surfaceContainerLowest: Colors.white,
+      surfaceContainerLow: const Color(0xFFFBFCFE),
+      surfaceContainer: Colors.white,
+      surfaceContainerHigh: const Color(0xFFF0F4FA),
+      surfaceContainerHighest: const Color(0xFFE8EFF7),
+      outlineVariant: const Color(0xFFD7E0EC),
+      surfaceTint: _weatherSeed,
     );
   }
 }
