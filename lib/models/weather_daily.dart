@@ -7,6 +7,7 @@ class DailyForecast {
   final int tempMin;
   final String icon;
   final int pop;
+  final double precip;
   final String sunrise;
   final String sunset;
   final int uvIndex;
@@ -18,6 +19,7 @@ class DailyForecast {
     required this.tempMin,
     required this.icon,
     required this.pop,
+    required this.precip,
     required this.sunrise,
     required this.sunset,
     required this.uvIndex,
@@ -49,6 +51,7 @@ class DailyForecast {
       tempMin: int.tryParse(json['tempMin']?.toString() ?? '') ?? 0,
       icon: json['iconDay']?.toString() ?? '', // Using daytime icon
       pop: int.tryParse(json['pop']?.toString() ?? '') ?? 0,
+      precip: double.tryParse(json['precip']?.toString() ?? '') ?? 0.0,
       sunrise: json['sunrise']?.toString() ?? '',
       sunset: json['sunset']?.toString() ?? '',
       uvIndex: int.tryParse(json['uvIndex']?.toString() ?? '') ?? 0,
