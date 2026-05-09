@@ -148,6 +148,7 @@ class HomeScreen extends StatelessWidget {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) => ChangeNotifierProvider.value(
@@ -226,6 +227,9 @@ class _ThemeModeBottomSheet extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.86,
+      ),
       padding: const EdgeInsets.fromLTRB(
         AuraSpacing.md,
         AuraSpacing.sm,
@@ -245,109 +249,164 @@ class _ThemeModeBottomSheet extends StatelessWidget {
           top: BorderSide(color: colorScheme.outlineVariant.withAlpha(128)),
         ),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: AuraSpacing.lg * 2,
-              height: AuraSpacing.xxs,
-              decoration: BoxDecoration(
-                color: colorScheme.onSurfaceVariant.withAlpha(102),
-                borderRadius: BorderRadius.circular(AuraRadii.full),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: AuraSpacing.lg * 2,
+                height: AuraSpacing.xxs,
+                decoration: BoxDecoration(
+                  color: colorScheme.onSurfaceVariant.withAlpha(102),
+                  borderRadius: BorderRadius.circular(AuraRadii.full),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AuraSpacing.lg),
-          Row(
-            children: [
-              Container(
-                width: AuraSpacing.xxl + AuraSpacing.sm,
-                height: AuraSpacing.xxl + AuraSpacing.sm,
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(AuraRadii.icon),
+            const SizedBox(height: AuraSpacing.lg),
+            Row(
+              children: [
+                Container(
+                  width: AuraSpacing.xxl + AuraSpacing.sm,
+                  height: AuraSpacing.xxl + AuraSpacing.sm,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primaryContainer,
+                    borderRadius: BorderRadius.circular(AuraRadii.icon),
+                  ),
+                  child: Icon(
+                    Icons.palette_outlined,
+                    color: colorScheme.onPrimaryContainer,
+                    size: AuraSpacing.xl,
+                  ),
                 ),
-                child: Icon(
-                  Icons.palette_outlined,
-                  color: colorScheme.onPrimaryContainer,
-                  size: AuraSpacing.xl,
-                ),
-              ),
-              const SizedBox(width: AuraSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Theme',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                const SizedBox(width: AuraSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Theme',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
+                      const SizedBox(height: AuraSpacing.xxs),
+                      Text(
+                        'Match your device, or keep Aura bright or moonlit.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AuraSpacing.lg),
+            Consumer<ThemeModeController>(
+              builder: (context, controller, child) {
+                return SegmentedButton<ThemeMode>(
+                  selected: {controller.themeMode},
+                  showSelectedIcon: false,
+                  style: ButtonStyle(
+                    visualDensity: VisualDensity.comfortable,
+                    side: WidgetStateProperty.resolveWith((states) {
+                      final selected = states.contains(WidgetState.selected);
+                      return BorderSide(
+                        color: selected
+                            ? colorScheme.primary
+                            : colorScheme.outlineVariant,
+                      );
+                    }),
+                  ),
+                  segments: const [
+                    ButtonSegment(
+                      value: ThemeMode.system,
+                      icon: Icon(Icons.devices_outlined),
+                      label: Text('System'),
                     ),
-                    const SizedBox(height: AuraSpacing.xxs),
-                    Text(
-                      'Match your device, or keep Aura bright or moonlit.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    ButtonSegment(
+                      value: ThemeMode.light,
+                      icon: Icon(Icons.light_mode_outlined),
+                      label: Text('Light'),
+                    ),
+                    ButtonSegment(
+                      value: ThemeMode.dark,
+                      icon: Icon(Icons.dark_mode_outlined),
+                      label: Text('Dark'),
                     ),
                   ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AuraSpacing.lg),
-          Consumer<ThemeModeController>(
-            builder: (context, controller, child) {
-              return SegmentedButton<ThemeMode>(
-                selected: {controller.themeMode},
-                showSelectedIcon: false,
-                style: ButtonStyle(
-                  visualDensity: VisualDensity.comfortable,
-                  side: WidgetStateProperty.resolveWith((states) {
-                    final selected = states.contains(WidgetState.selected);
-                    return BorderSide(
-                      color: selected
-                          ? colorScheme.primary
-                          : colorScheme.outlineVariant,
-                    );
-                  }),
-                ),
-                segments: const [
-                  ButtonSegment(
-                    value: ThemeMode.system,
-                    icon: Icon(Icons.devices_outlined),
-                    label: Text('System'),
-                  ),
-                  ButtonSegment(
-                    value: ThemeMode.light,
-                    icon: Icon(Icons.light_mode_outlined),
-                    label: Text('Light'),
-                  ),
-                  ButtonSegment(
-                    value: ThemeMode.dark,
-                    icon: Icon(Icons.dark_mode_outlined),
-                    label: Text('Dark'),
-                  ),
-                ],
-                onSelectionChanged: (selection) {
-                  if (selection.isEmpty) return;
-                  unawaited(controller.setThemeMode(selection.first));
-                },
-              );
-            },
-          ),
-          const SizedBox(height: AuraSpacing.md),
-          Text(
-            'Your choice is saved on this device.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+                  onSelectionChanged: (selection) {
+                    if (selection.isEmpty) return;
+                    unawaited(controller.setThemeMode(selection.first));
+                  },
+                );
+              },
             ),
-          ),
-        ],
+            const SizedBox(height: AuraSpacing.md),
+            Text(
+              'Your choice is saved on this device.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: AuraSpacing.lg),
+            Divider(color: colorScheme.outlineVariant.withAlpha(128)),
+            const SizedBox(height: AuraSpacing.lg),
+            const _WeatherBackgroundPreviewSection(),
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _WeatherBackgroundPreviewSection extends StatelessWidget {
+  const _WeatherBackgroundPreviewSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final palettes = WeatherAtmosphere.previewPalettes(colorScheme);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(
+              Icons.gradient_outlined,
+              color: colorScheme.primary,
+              size: AuraSpacing.lg,
+            ),
+            const SizedBox(width: AuraSpacing.xs),
+            Text(
+              'Weather backgrounds',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                color: colorScheme.onSurface,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AuraSpacing.xs),
+        Text(
+          'Compact previews of Aura\'s condition-aware atmosphere colors.',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: AuraSpacing.md),
+        Wrap(
+          spacing: AuraSpacing.sm,
+          runSpacing: AuraSpacing.md,
+          children: [
+            for (final palette in palettes)
+              WeatherAtmospherePreviewSwatch(palette: palette),
+          ],
+        ),
+      ],
     );
   }
 }

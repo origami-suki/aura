@@ -74,7 +74,7 @@ void main() {
     expect(viewModel.retryCount, 1);
   });
 
-  testWidgets('HomeScreen theme menu exposes three theme options', (
+  testWidgets('HomeScreen theme menu exposes theme options and previews', (
     tester,
   ) async {
     await tester.pumpWidget(_buildHomeScreen(_loadedWeatherState()));
@@ -87,6 +87,12 @@ void main() {
     expect(find.text('System'), findsOneWidget);
     expect(find.text('Light'), findsOneWidget);
     expect(find.text('Dark'), findsOneWidget);
+    expect(find.text('Weather backgrounds'), findsOneWidget);
+    expect(find.text('Clear day'), findsOneWidget);
+    expect(find.text('Cloud'), findsOneWidget);
+    expect(find.text('Rain'), findsOneWidget);
+    expect(find.text('Mist'), findsOneWidget);
+    expect(find.text('Night'), findsOneWidget);
   });
 
   testWidgets('selecting a HomeScreen theme updates controller selection', (

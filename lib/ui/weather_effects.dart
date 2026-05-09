@@ -53,6 +53,19 @@ class WeatherAtmosphere extends StatelessWidget {
     );
   }
 
+  static List<WeatherAtmospherePreviewPalette> previewPalettes(
+    ColorScheme colorScheme,
+  ) {
+    return _WeatherPalette.previewPalettes(colorScheme)
+        .map(
+          (palette) => WeatherAtmospherePreviewPalette(
+            label: palette.label,
+            colors: palette.colors,
+          ),
+        )
+        .toList(growable: false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = _WeatherPalette.resolve(
@@ -95,6 +108,65 @@ class WeatherAtmosphere extends StatelessWidget {
         ),
         child,
       ],
+    );
+  }
+}
+
+class WeatherAtmospherePreviewPalette {
+  final String label;
+  final List<Color> colors;
+
+  const WeatherAtmospherePreviewPalette({
+    required this.label,
+    required this.colors,
+  });
+}
+
+class WeatherAtmospherePreviewSwatch extends StatelessWidget {
+  final WeatherAtmospherePreviewPalette palette;
+
+  const WeatherAtmospherePreviewSwatch({super.key, required this.palette});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Semantics(
+      label: '${palette.label} weather background preview',
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: AuraSpacing.xxl * 2,
+            height: AuraSpacing.xxl + AuraSpacing.lg,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: palette.colors,
+                stops: const [0, 0.48, 1],
+              ),
+              borderRadius: BorderRadius.circular(AuraRadii.tile),
+              border: Border.all(color: colorScheme.outlineVariant),
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.shadow.withAlpha(16),
+                  blurRadius: AuraSpacing.lg,
+                  offset: const Offset(0, AuraSpacing.xs),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AuraSpacing.xs),
+          Text(
+            palette.label,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -201,9 +273,20 @@ class SectionHeader extends StatelessWidget {
 
 class _WeatherPalette {
   final String kind;
+  final String label;
   final List<Color> colors;
 
-  const _WeatherPalette(this.kind, this.colors);
+  const _WeatherPalette(this.kind, this.label, this.colors);
+
+  static List<_WeatherPalette> previewPalettes(ColorScheme colorScheme) {
+    return [
+      _clearDay(colorScheme),
+      _cloud(colorScheme),
+      _rain(colorScheme),
+      _mist(colorScheme),
+      _night(colorScheme),
+    ];
+  }
 
   static _WeatherPalette resolve({
     required WeatherNow? weather,
@@ -223,51 +306,71 @@ class _WeatherPalette {
         icon == '101' || icon == '104' || condition.contains('cloud');
 
     if (isNight) {
-      return _WeatherPalette('night', [
-        const Color(0xFF171D52),
-        const Color(0xFF3F4DBA),
-        Color.alphaBlend(
-          const Color(0xFF5E68BD).withAlpha(166),
-          colorScheme.surface,
-        ),
-      ]);
+      return _night(colorScheme);
     }
     if (isRain) {
-      return _WeatherPalette('rain', [
-        const Color(0xFF7897B8),
-        const Color(0xFFB8CBD8),
-        Color.alphaBlend(
-          const Color(0xFFE7EEF3).withAlpha(196),
-          colorScheme.surface,
-        ),
-      ]);
+      return _rain(colorScheme);
     }
     if (isSnow || isFog) {
-      return _WeatherPalette('mist', [
-        const Color(0xFFC8D8E4),
-        const Color(0xFFE1E9EE),
-        Color.alphaBlend(
-          const Color(0xFFF7FAFC).withAlpha(220),
-          colorScheme.surface,
-        ),
-      ]);
+      return _mist(colorScheme);
     }
     if (isCloud) {
-      return _WeatherPalette('cloud', [
-        const Color(0xFF9DB7D1),
-        const Color(0xFFD6E0E8),
-        Color.alphaBlend(
-          const Color(0xFFF4F0E8).withAlpha(210),
-          colorScheme.surface,
-        ),
-      ]);
+      return _cloud(colorScheme);
     }
 
-    return _WeatherPalette('clear-day', [
-      const Color(0xFFFFBA5E),
-      const Color(0xFFFFC67E),
+    return _clearDay(colorScheme);
+  }
+
+  static _WeatherPalette _night(ColorScheme colorScheme) {
+    return _WeatherPalette('night', 'Night', [
+      const Color(0xFF171D52),
+      const Color(0xFF3F4DBA),
       Color.alphaBlend(
-        const Color(0xFFFFF0E2).withAlpha(232),
+        const Color(0xFF5E68BD).withAlpha(166),
+        colorScheme.surface,
+      ),
+    ]);
+  }
+
+  static _WeatherPalette _rain(ColorScheme colorScheme) {
+    return _WeatherPalette('rain', 'Rain', [
+      const Color(0xFF92AFC2),
+      const Color(0xFFC2D5E1),
+      Color.alphaBlend(
+        const Color(0xFFEAF2F7).withAlpha(218),
+        colorScheme.surface,
+      ),
+    ]);
+  }
+
+  static _WeatherPalette _mist(ColorScheme colorScheme) {
+    return _WeatherPalette('mist', 'Mist', [
+      const Color(0xFFCAD7DE),
+      const Color(0xFFE1E9EE),
+      Color.alphaBlend(
+        const Color(0xFFF7FAFC).withAlpha(224),
+        colorScheme.surface,
+      ),
+    ]);
+  }
+
+  static _WeatherPalette _cloud(ColorScheme colorScheme) {
+    return _WeatherPalette('cloud', 'Cloud', [
+      const Color(0xFFB9CAD6),
+      const Color(0xFFD8E2EA),
+      Color.alphaBlend(
+        const Color(0xFFF3F7FA).withAlpha(218),
+        colorScheme.surface,
+      ),
+    ]);
+  }
+
+  static _WeatherPalette _clearDay(ColorScheme colorScheme) {
+    return _WeatherPalette('clear-day', 'Clear day', [
+      const Color(0xFFA9DDF7),
+      const Color(0xFFFFE2A1),
+      Color.alphaBlend(
+        const Color(0xFFFFF7E6).withAlpha(226),
         colorScheme.surface,
       ),
     ]);
