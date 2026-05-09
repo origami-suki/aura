@@ -77,6 +77,8 @@ class DetailsStaggeredGrid extends StatelessWidget {
   }
 
   Widget _buildPrecipitationCard(BuildContext context) {
+    final precip = _formatPrecipitation(todayForecast.precip);
+
     return _buildCardBase(
       context,
       height: 120,
@@ -94,7 +96,7 @@ class DetailsStaggeredGrid extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              "${weather.precip} mm",
+              "$precip mm",
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(
@@ -105,6 +107,11 @@ class DetailsStaggeredGrid extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatPrecipitation(double value) {
+    if (value == value.roundToDouble()) return value.toInt().toString();
+    return value.toStringAsFixed(1);
   }
 
   Widget _buildWindCard(BuildContext context) {
