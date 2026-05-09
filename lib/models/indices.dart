@@ -8,11 +8,14 @@ class AqiNow {
   });
 
   factory AqiNow.fromJson(Map<String, dynamic> json) {
-    final now = json['now'] as Map<String, dynamic>? ?? {};
+    final indexes = json['indexes'] as List<dynamic>? ?? const [];
+    final index = indexes.isEmpty
+        ? <String, dynamic>{}
+        : indexes.first as Map<String, dynamic>;
 
     return AqiNow(
-      aqi: int.tryParse(now['aqi']?.toString() ?? '') ?? 0,
-      category: now['category']?.toString() ?? 'Unknown',
+      aqi: int.tryParse(index['aqi']?.toString() ?? '') ?? 0,
+      category: index['category']?.toString() ?? 'Unknown',
     );
   }
 }
