@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/weather_hourly.dart';
-import '../utils/weather_icons.dart';
+import '../utils/weather_icons.dart' show getWeatherIcon;
 
 class HourlyForecastCard extends StatelessWidget {
   final List<HourlyForecast> hourlyData;
@@ -46,7 +46,7 @@ class HourlyForecastCard extends StatelessWidget {
                       forecast.time,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
-                    Icon(getIconForCondition(forecast.icon)),
+                    getWeatherIcon(forecast.icon, size: 28),
                     Text(
                       '${forecast.temp}°',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(

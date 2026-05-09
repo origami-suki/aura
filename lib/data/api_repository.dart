@@ -30,28 +30,38 @@ class ApiWeatherRepository {
 
   Future<Map<String, String>> _getHeaders() async {
     final deviceId = await _getDeviceId();
-    return {
-      'Content-Type': 'application/json',
-      'X-Device-ID': deviceId,
-    };
+    return {'Content-Type': 'application/json', 'X-Device-ID': deviceId};
   }
 
   Future<LocationResponse> getLocation() async {
     final headers = await _getHeaders();
-    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/user/location'), headers: headers);
+    final response = await _client.get(
+      Uri.parse('${AppConfig.apiBaseUrl}/user/location'),
+      headers: headers,
+    );
 
     if (response.statusCode == 200) {
-      return LocationResponse.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+      return LocationResponse.fromJson(
+        jsonDecode(utf8.decode(response.bodyBytes)),
+      );
     } else if (response.statusCode == 404) {
       // If no location found, save a default one and retry
-      await saveLocation(longitude: -74.0060, latitude: 40.7128, cityName: "New York");
+      await saveLocation(
+        longitude: -74.0060,
+        latitude: 40.7128,
+        cityName: "New York",
+      );
       return getLocation();
     } else {
       throw Exception('Failed to load location: ${response.statusCode}');
     }
   }
 
-  Future<void> saveLocation({required double longitude, required double latitude, String? cityName}) async {
+  Future<void> saveLocation({
+    required double longitude,
+    required double latitude,
+    String? cityName,
+  }) async {
     final headers = await _getHeaders();
     final body = jsonEncode({
       'longitude': longitude,
@@ -70,8 +80,37 @@ class ApiWeatherRepository {
     }
   }
 
+  Future<List<CitySearchResult>> searchCity(
+    String query, {
+    String lang = 'en',
+  }) async {
+    final trimmedQuery = query.trim();
+    if (trimmedQuery.isEmpty) return [];
+
+    final uri = Uri.parse(
+      '${AppConfig.apiBaseUrl}/city/search',
+    ).replace(queryParameters: {'location': trimmedQuery, 'lang': lang});
+
+    final response = await _client.get(uri);
+    if (response.statusCode == 200) {
+      final json = jsonDecode(utf8.decode(response.bodyBytes));
+      final code = json['code']?.toString();
+      if (code != null && code != '200') {
+        throw Exception('City search failed with code $code');
+      }
+      final List<dynamic> locationsJson = json['location'] ?? [];
+      return locationsJson.map((e) => CitySearchResult.fromJson(e)).toList();
+    }
+
+    throw Exception('Failed to search city: ${response.statusCode}');
+  }
+
   Future<WeatherNow> getWeatherNow(String location) async {
-    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/weather/now?location=$location&lang=en&unit=m'));
+    final response = await _client.get(
+      Uri.parse(
+        '${AppConfig.apiBaseUrl}/weather/now?location=$location&lang=en&unit=m',
+      ),
+    );
     if (response.statusCode == 200) {
       return WeatherNow.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
     }
@@ -79,7 +118,11 @@ class ApiWeatherRepository {
   }
 
   Future<List<HourlyForecast>> getHourlyForecast(String location) async {
-    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/weather/hourly?location=$location&lang=en&unit=m'));
+    final response = await _client.get(
+      Uri.parse(
+        '${AppConfig.apiBaseUrl}/weather/hourly?location=$location&lang=en&unit=m',
+      ),
+    );
     if (response.statusCode == 200) {
       final json = jsonDecode(utf8.decode(response.bodyBytes));
       final List<dynamic> hourlyJson = json['hourly'] ?? [];
@@ -89,7 +132,11 @@ class ApiWeatherRepository {
   }
 
   Future<List<DailyForecast>> getDailyForecast(String location) async {
-    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/weather/daily?location=$location&lang=en&unit=m'));
+    final response = await _client.get(
+      Uri.parse(
+        '${AppConfig.apiBaseUrl}/weather/daily?location=$location&lang=en&unit=m',
+      ),
+    );
     if (response.statusCode == 200) {
       final json = jsonDecode(utf8.decode(response.bodyBytes));
       final List<dynamic> dailyJson = json['daily'] ?? [];
@@ -99,7 +146,9 @@ class ApiWeatherRepository {
   }
 
   Future<AqiNow> getAqiNow(String location) async {
-    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/aqi/now?location=$location&lang=en'));
+    final response = await _client.get(
+      Uri.parse('${AppConfig.apiBaseUrl}/aqi/now?location=$location&lang=en'),
+    );
     if (response.statusCode == 200) {
       return AqiNow.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
     }
@@ -108,7 +157,11 @@ class ApiWeatherRepository {
 
   Future<List<IndexInfo>> getIndices(String location) async {
     // 0 = all indices
-    final response = await _client.get(Uri.parse('${AppConfig.apiBaseUrl}/indices?location=$location&type=0&lang=en'));
+    final response = await _client.get(
+      Uri.parse(
+        '${AppConfig.apiBaseUrl}/indices?location=$location&type=0&lang=en',
+      ),
+    );
     if (response.statusCode == 200) {
       final json = jsonDecode(utf8.decode(response.bodyBytes));
       final List<dynamic> indicesJson = json['daily'] ?? [];

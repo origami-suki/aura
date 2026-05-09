@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../data/api_repository.dart';
 
+import '../models/location.dart';
 import '../models/weather_now.dart';
 import '../models/weather_hourly.dart';
 import '../models/weather_daily.dart';
@@ -10,6 +11,7 @@ import 'weather_ui_state.dart';
 class WeatherViewModel extends ChangeNotifier {
   final ApiWeatherRepository _repository = ApiWeatherRepository();
   WeatherUiState _uiState = WeatherUiState();
+  int _citySearchRequestId = 0;
 
   WeatherUiState get uiState => _uiState;
 
@@ -40,7 +42,9 @@ class WeatherViewModel extends ChangeNotifier {
       final aqiNow = results[3] as AqiNow?;
       final indices = results[4] as List<IndexInfo>? ?? [];
 
-      if (weatherNow == null && dailyForecast.isEmpty && hourlyForecast.isEmpty) {
+      if (weatherNow == null &&
+          dailyForecast.isEmpty &&
+          hourlyForecast.isEmpty) {
         _uiState = _uiState.copyWith(
           isLoading: false,
           errorMessage: "Failed to load weather data. Pull to retry.",
@@ -70,6 +74,77 @@ class WeatherViewModel extends ChangeNotifier {
       return await fetcher();
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<void> searchCities(String query, {String lang = 'en'}) async {
+    final trimmedQuery = query.trim();
+    final requestId = ++_citySearchRequestId;
+
+    if (trimmedQuery.isEmpty) {
+      _uiState = _uiState.copyWith(
+        citySearchResults: [],
+        isSearchingCities: false,
+        citySearchError: null,
+      );
+      notifyListeners();
+      return;
+    }
+
+    _uiState = _uiState.copyWith(
+      isSearchingCities: true,
+      citySearchError: null,
+    );
+    notifyListeners();
+
+    try {
+      final results = await _repository.searchCity(trimmedQuery, lang: lang);
+      if (requestId != _citySearchRequestId) return;
+
+      _uiState = _uiState.copyWith(
+        citySearchResults: results,
+        isSearchingCities: false,
+        citySearchError: null,
+      );
+    } catch (_) {
+      if (requestId != _citySearchRequestId) return;
+
+      _uiState = _uiState.copyWith(
+        citySearchResults: [],
+        isSearchingCities: false,
+        citySearchError: 'Failed to search cities. Please try again.',
+      );
+    }
+    notifyListeners();
+  }
+
+  void clearCitySearch() {
+    _citySearchRequestId++;
+    _uiState = _uiState.copyWith(
+      citySearchResults: [],
+      isSearchingCities: false,
+      citySearchError: null,
+    );
+    notifyListeners();
+  }
+
+  Future<void> selectCity(CitySearchResult result) async {
+    try {
+      _uiState = _uiState.copyWith(citySearchError: null);
+      notifyListeners();
+
+      await _repository.saveLocation(
+        longitude: result.longitude,
+        latitude: result.latitude,
+        cityName: result.name,
+      );
+      await loadWeatherData();
+    } catch (_) {
+      _uiState = _uiState.copyWith(
+        citySearchError: 'Failed to save city. Please try again.',
+      );
+      notifyListeners();
+      rethrow;
     }
   }
 

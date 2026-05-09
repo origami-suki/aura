@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/weather_daily.dart';
-import '../utils/weather_icons.dart';
+import '../utils/weather_icons.dart' show getWeatherIcon;
 
 class DailyForecastCard extends StatelessWidget {
   final List<DailyForecast> dailyData;
@@ -53,7 +53,7 @@ class DailyForecastCard extends StatelessWidget {
                         fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),
-                    Icon(getIconForCondition(forecast.icon)),
+                    getWeatherIcon(forecast.icon, size: 32),
                     if (forecast.pop > 0)
                       Text(
                         '${forecast.pop}%',
