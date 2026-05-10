@@ -33,7 +33,11 @@ class ApiWeatherRepository {
     return {'Content-Type': 'application/json', 'X-Device-ID': deviceId};
   }
 
-  Future<LocationResponse> getLocation() async {
+  /// Returns the device's saved backend location, or null when none exists.
+  ///
+  /// Does NOT trigger the default Xi'an fallback. Callers that need the
+  /// default behavior should use [getLocation] instead.
+  Future<LocationResponse?> getSavedLocation() async {
     final headers = await _getHeaders();
     final response = await _client.get(
       Uri.parse('${AppConfig.apiBaseUrl}/user/location'),
@@ -45,16 +49,25 @@ class ApiWeatherRepository {
         jsonDecode(utf8.decode(response.bodyBytes)),
       );
     } else if (response.statusCode == 404) {
-      // If no location found, save a default one and retry
-      await saveLocation(
-        longitude: 108.9398,
-        latitude: 34.3416,
-        cityName: '西安',
-      );
-      return getLocation();
+      return null;
     } else {
       throw Exception('Failed to load location: ${response.statusCode}');
     }
+  }
+
+  /// Returns the persisted device location, creating a default Xi'an fixture
+  /// if none exists. Callers that need to detect a missing location before
+  /// the default is saved should use [getSavedLocation].
+  Future<LocationResponse> getLocation() async {
+    final saved = await getSavedLocation();
+    if (saved != null) return saved;
+
+    await saveLocation(
+      longitude: 108.9398,
+      latitude: 34.3416,
+      cityName: '西安',
+    );
+    return getLocation();
   }
 
   Future<void> saveLocation({
