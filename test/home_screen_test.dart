@@ -60,8 +60,6 @@ void main() {
         errorMessage: 'Unable to load test weather.',
       ),
     );
-    // Reset count: WeatherViewModel constructor calls loadWeatherData().
-    viewModel.retryCount = 0;
 
     await tester.pumpWidget(_buildHomeScreenWithViewModel(viewModel));
 
@@ -225,7 +223,7 @@ WeatherUiState _loadedWeatherState() {
 }
 
 class _FakeWeatherViewModel extends WeatherViewModel {
-  _FakeWeatherViewModel(this._state);
+  _FakeWeatherViewModel(this._state) : super(autoLoad: false);
 
   final WeatherUiState _state;
   int retryCount = 0;

@@ -69,7 +69,7 @@ Widget _buildApp(ThemeModeController controller) {
 }
 
 class _FakeWeatherViewModel extends WeatherViewModel {
-  _FakeWeatherViewModel(this._state);
+  _FakeWeatherViewModel(this._state) : super(autoLoad: false);
 
   final WeatherUiState _state;
 

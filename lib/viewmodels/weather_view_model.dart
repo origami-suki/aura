@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../data/api_repository.dart';
+import '../services/device_location_service.dart';
 
 import '../models/location.dart';
 import '../models/weather_now.dart';
@@ -9,14 +10,20 @@ import '../models/indices.dart';
 import 'weather_ui_state.dart';
 
 class WeatherViewModel extends ChangeNotifier {
-  final ApiWeatherRepository _repository = ApiWeatherRepository();
+  final ApiWeatherRepository _repository;
+  final DeviceLocationService _locationService;
   WeatherUiState _uiState = WeatherUiState();
   int _citySearchRequestId = 0;
 
   WeatherUiState get uiState => _uiState;
 
-  WeatherViewModel() {
-    loadWeatherData();
+  WeatherViewModel({
+    ApiWeatherRepository? repository,
+    DeviceLocationService? locationService,
+    bool autoLoad = true,
+  }) : _repository = repository ?? ApiWeatherRepository(),
+       _locationService = locationService ?? DeviceLocationService() {
+    if (autoLoad) loadWeatherData();
   }
 
   Future<void> loadWeatherData() async {
@@ -24,8 +31,29 @@ class WeatherViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final location = await _repository.getLocation();
-      final locString = "${location.longitude},${location.latitude}";
+      // Check if backend has a saved location for this device.
+      LocationResponse? location = await _repository.getSavedLocation();
+
+      // If not, attempt Android device GPS bootstrap before falling back.
+      if (location == null) {
+        final gps = await _locationService.getCurrentPosition();
+        if (gps != null) {
+          final cityName = await _resolveCityName(gps);
+          await _repository.saveLocation(
+            longitude: gps.longitude,
+            latitude: gps.latitude,
+            cityName: cityName,
+          );
+        }
+      }
+
+      // Always resolve the final persisted location.
+      // When a saved location exists this returns it directly.
+      // When GPS saved new coords this fetches the full LocationResponse.
+      // Otherwise this creates the default Xi'an fallback.
+      final persistedLocation = await _repository.getLocation();
+      final locString =
+          "${persistedLocation.longitude},${persistedLocation.latitude}";
 
       // Fetch each endpoint independently so one failure doesn't block others.
       final results = await Future.wait([
@@ -52,7 +80,7 @@ class WeatherViewModel extends ChangeNotifier {
       } else {
         _uiState = _uiState.copyWith(
           isLoading: false,
-          location: location,
+          location: persistedLocation,
           weatherNow: weatherNow,
           hourlyForecast: hourlyForecast,
           dailyForecast: dailyForecast,
@@ -67,6 +95,18 @@ class WeatherViewModel extends ChangeNotifier {
       );
     }
     notifyListeners();
+  }
+
+  Future<String?> _resolveCityName(DeviceCoordinates gps) async {
+    try {
+      final results = await _repository.searchCity(
+        "${gps.longitude},${gps.latitude}",
+      );
+      if (results.isEmpty) return null;
+      return results.first.name;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<T?> _tryFetch<T>(Future<T> Function() fetcher) async {
