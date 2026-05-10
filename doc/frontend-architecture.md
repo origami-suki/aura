@@ -16,6 +16,7 @@ Aura Weather 是一个 Flutter 天气应用。当前前端以单页首页为核�
 | 本地持久化 | `shared_preferences` 保存 `device_id` |
 | ID 生成 | `uuid` |
 | 时间格式化 | `intl` |
+| 定位 | `geolocator`（Android foreground 定位权限：`ACCESS_COARSE_LOCATION`、`ACCESS_FINE_LOCATION`） |
 | 图标字体 | `cupertino_icons` |
 | 静态资源 | `assets/icons/` 下的 pixel weather icons |
 | 静态检查和测试 | `flutter_lints`、`flutter_test`，通过 `flutter analyze` 和 `flutter test` 运行 |
@@ -31,6 +32,8 @@ lib/
     app_config.dart                 # API base URL 配置
   data/
     api_repository.dart             # 后端 API 访问层
+  services/
+    device_location_service.dart    # Android 设备定位服务封装
   models/
     location.dart                   # 位置响应模型
     weather_now.dart                # 实时天气模型
@@ -75,6 +78,8 @@ flowchart TD
   consumer --> state[WeatherUiState]
 
   vm --> repo[ApiWeatherRepository]
+  vm --> locSvc[DeviceLocationService]
+  locSvc --> geolocator[Geolocator Android]
   repo --> config[AppConfig.apiBaseUrl]
   repo --> prefs[SharedPreferences device_id]
   repo --> api[Aura API]
@@ -184,11 +189,25 @@ class WeatherUiState {
 
 `lib/viewmodels/weather_view_model.dart` 是当前最重要的数据编排层。
 
+构造函数接受可选注入以支持测试：
+
+```dart
+WeatherViewModel({
+  ApiWeatherRepository? repository,
+  DeviceLocationService? locationService,
+  bool autoLoad = true,
+})
+```
+
+- `repository`：可选注入 `ApiWeatherRepository`，未提供时使用默认实例。
+- `locationService`：可选注入 `DeviceLocationService`，未提供时使用默认实例。
+- `autoLoad`：是否在构造后自动调用 `loadWeatherData()`。生产环境默认 true，测试可传入 false 避免副作用。
+
 生命周期：
 
-1. 构造函数中立即调用 `loadWeatherData()`。
+1. 构造函数中立即调用 `loadWeatherData()`（当 `autoLoad` 为 true）。
 2. `loadWeatherData()` 先设置 `isLoading: true` 并通知 UI。
-3. 通过 Repository 获取位置。
+3. 通过 Repository 检测并获取位置：先检查后端已保存位置，无位置时尝试 Android GPS 引导（获取坐标 → 通过 `/city/search` 解析城市名 → 保存位置），最后通过 `getLocation()` 解析持久化位置（回退到默认西安）。
 4. 根据 `longitude,latitude` 拼接天气 API 的 `location` query 参数。
 5. 使用 `Future.wait` 并发请求天气相关接口。
 6. 聚合结果后更新 `WeatherUiState`。
@@ -221,6 +240,59 @@ sequenceDiagram
   Repo-->>VM: Model objects
   VM->>UI: WeatherUiState, notifyListeners()
 ```
+
+Android 首次定位引导（Location Bootstrap）：
+
+当设备在后端没有保存位置时，WeatherViewModel 会尝试通过 Android 设备 GPS 获取当前坐标来自动初始化区域：
+
+1. 调用 `_repository.getSavedLocation()` 检查后端是否有已保存位置。
+2. 如果返回 null（404），则调用 `DeviceLocationService.getCurrentPosition()`。
+3. 仅 Android 平台支持：检查定位服务是否开启，检查并请求前台定位权限，使用低精度获取当前坐标，带 8 秒超时（`timeLimit`）避免长时间 loading。
+4. 如果获取到坐标，先通过 `_repository.searchCity("longitude,latitude")` 调用 `/city/search` 接口解析就近城市名。成功时取第一条结果的 `name` 作为 `cityName`；查询失败或返回空列表时 `cityName` 为 null，不影响后续流程。
+5. 调用 `_repository.saveLocation(longitude, latitude, cityName)` 保存到后端。
+6. 无论上述哪一步，最后都通过 `_repository.getLocation()` 获取持久化的 `LocationResponse`。
+7. 如果未获取到坐标或平台不支持，`_repository.getLocation()` 会走原有默认西安 fallback 逻辑。
+
+```mermaid
+sequenceDiagram
+  participant VM as WeatherViewModel
+  participant Repo as ApiWeatherRepository
+  participant Loc as DeviceLocationService
+  participant API as Backend API
+
+  VM->>Repo: getSavedLocation()
+  Repo->>API: GET /user/location
+  alt 已存在位置
+    API-->>Repo: LocationResponse
+    Repo-->>VM: LocationResponse
+  else 404
+    Repo-->>VM: null
+    VM->>Loc: getCurrentPosition()
+    Loc->>Loc: 检查定位服务、权限
+    alt Android 且获取坐标成功
+      Loc-->>VM: (longitude, latitude)
+      VM->>Repo: searchCity("longitude,latitude")
+      Repo->>API: GET /city/search
+      API-->>Repo: CitySearchResult list
+      VM->>Repo: saveLocation(longitude, latitude, cityName)
+      Repo->>API: POST /user/location
+    else 无权限、服务禁用或非 Android
+      Loc-->>VM: null
+    end
+    VM->>Repo: getLocation()
+    alt GPS 已保存
+      Repo->>API: GET /user/location (200)
+      API-->>Repo: LocationResponse
+    else 无坐标 fallback
+      Repo->>API: POST /user/location (西安默认值)
+      Repo->>API: GET /user/location (200)
+      API-->>Repo: LocationResponse
+    end
+    Repo-->>VM: LocationResponse
+  end
+```
+
+该引导流程在 `loadWeatherData()` 开头执行，不影响后续天气数据获取。已有保存位置的设备不会触发 GPS 请求或权限弹窗。所有非 Android 平台直接走原有 fallback 路径。
 
 城市搜索和切换流程：
 
@@ -258,6 +330,7 @@ sequenceDiagram
 2. 再在 `WeatherViewModel.loadWeatherData()` 中添加 Repository 调用。
 3. 如果新增接口不是首页首屏必需，建议继续沿用 `_tryFetch` 的软失败模式。
 4. 如果新增接口是核心数据，必须把它纳入失败判定条件。
+5. `WeatherViewModel` 支持通过构造函数注入 `repository` 和 `locationService`，新测试应利用此注入避免真网络或定位依赖。
 
 ### 5.3 ThemeModeController
 
@@ -319,7 +392,8 @@ Repository 内部维护 `_deviceId` 缓存：
 
 | 方法 | HTTP | 路径 | 返回模型 | 说明 |
 | --- | --- | --- | --- | --- |
-| `getLocation()` | GET | `/user/location` | `LocationResponse` | 获取当前设备保存的位置 |
+| `getSavedLocation()` | GET | `/user/location` | `LocationResponse?` | 获取当前设备保存的位置，404 返回 null 不触发默认 fallback |
+| `getLocation()` | GET | `/user/location` | `LocationResponse` | 获取设备位置，无位置时自动保存默认 西安 并重试 |
 | `saveLocation()` | POST | `/user/location` | `void` | 保存经纬度和城市名 |
 | `searchCity()` | GET | `/city/search` | `List<CitySearchResult>` | 根据城市名或 location query 搜索城市 |
 | `getWeatherNow()` | GET | `/weather/now` | `WeatherNow` | 实时天气 |
@@ -330,9 +404,9 @@ Repository 内部维护 `_deviceId` 缓存：
 
 位置默认逻辑：
 
-1. `getLocation()` 遇到 404 时，会调用 `saveLocation(longitude: 108.9398, latitude: 34.3416, cityName: "西安")`。
-2. 保存默认位置后再次递归调用 `getLocation()`。
-3. 这意味着新设备默认城市是西安。
+1. `getSavedLocation()` 遇到 404 时返回 null，不触发默认保存。调用方（如 `WeatherViewModel`）可在此之前尝试设备 GPS 定位引导。
+2. `getLocation()` 内部调用 `getSavedLocation()`，如果返回 null 则调用 `saveLocation(longitude: 108.9398, latitude: 34.3416, cityName: "西安")` 保存默认位置后再递归获取。
+3. 这意味着新设备默认城市是西安，但 Android 设备会在首次启动时尝试用 GPS 坐标覆盖该默认值。
 
 请求和响应处理特点：
 
@@ -342,6 +416,27 @@ Repository 内部维护 `_deviceId` 缓存：
 4. 失败时抛出 `Exception`，由 ViewModel 的 `_tryFetch`、城市搜索 `try/catch` 或外层 `try/catch` 处理。
 5. `dispose()` 调用 `_client.close()`，由 `WeatherViewModel.dispose()` 触发。
 6. 天气、AQI、生活指数和城市搜索请求当前默认使用 `lang=zh`，天气请求还硬编码 `unit=m`。`openapi.json` 中这些 query 参数是可选项，默认语言为 `zh`，后续如果增加语言或单位设置，需要把这些值从用户偏好或系统 locale 传入 Repository。
+
+### 6.4 DeviceLocationService
+
+`lib/services/device_location_service.dart` 封装 `geolocator` 提供一次性设备位置获取：
+
+- 仅 Android 平台支持。非 Android 平台直接返回 null。
+- 调用 `Geolocator.isLocationServiceEnabled()` 检查定位服务。
+- 调用 `Geolocator.checkPermission()` 检查权限状态；若为 `denied` 则调用 `Geolocator.requestPermission()`。
+- `whileInUse` 和 `always` 均视为已授权。
+- 使用 `LocationAccuracy.low` 精度，适用于区域检测而非精确定位。
+- 设置 `timeLimit: Duration(seconds: 8)` 超时，避免 Android `low` 精度下首次定位的长时间等待。
+- 权限被拒绝（`denied`、`deniedForever`）、服务禁用、超时或获取坐标异常时返回 null，不抛出异常。
+
+Android 权限配置在 `android/app/src/main/AndroidManifest.xml`：
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+```
+
+仅前台定位权限，不包含后台定位或前台服务权限。
 
 新增 API 的推荐步骤：
 
