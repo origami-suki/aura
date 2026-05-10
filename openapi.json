@@ -97,6 +97,58 @@
         }
       }
     },
+    "/api/v1/city/search": {
+      "get": {
+        "tags": [
+          "city"
+        ],
+        "summary": "City Search",
+        "operationId": "city_search_api_v1_city_search_get",
+        "parameters": [
+          {
+            "name": "location",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Location"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "zh",
+              "title": "Lang"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CitySearchResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/weather/now": {
       "get": {
         "tags": [
@@ -400,6 +452,100 @@
   },
   "components": {
     "schemas": {
+      "CitySearchLocation": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "lat": {
+            "type": "string",
+            "title": "Lat"
+          },
+          "lon": {
+            "type": "string",
+            "title": "Lon"
+          },
+          "adm1": {
+            "type": "string",
+            "title": "Adm1"
+          },
+          "adm2": {
+            "type": "string",
+            "title": "Adm2"
+          },
+          "country": {
+            "type": "string",
+            "title": "Country"
+          },
+          "tz": {
+            "type": "string",
+            "title": "Tz"
+          },
+          "utcOffset": {
+            "type": "string",
+            "title": "Utcoffset"
+          },
+          "isDst": {
+            "type": "string",
+            "title": "Isdst"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "rank": {
+            "type": "string",
+            "title": "Rank"
+          },
+          "fxLink": {
+            "type": "string",
+            "title": "Fxlink"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "lat",
+          "lon",
+          "adm1",
+          "adm2",
+          "country",
+          "tz",
+          "utcOffset",
+          "isDst",
+          "type",
+          "rank",
+          "fxLink"
+        ],
+        "title": "CitySearchLocation"
+      },
+      "CitySearchResponse": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "location": {
+            "items": {
+              "$ref": "#/components/schemas/CitySearchLocation"
+            },
+            "type": "array",
+            "title": "Location"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "location"
+        ],
+        "title": "CitySearchResponse"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {

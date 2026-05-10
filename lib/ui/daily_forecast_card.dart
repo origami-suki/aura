@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/weather_daily.dart';
+import '../utils/weather_icons.dart' show getWeatherIcon;
+import 'weather_effects.dart';
 
 class DailyForecastCard extends StatelessWidget {
   final List<DailyForecast> dailyData;
@@ -13,49 +15,42 @@ class DailyForecastCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Text(
-            "10-Day forecast",
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-        ),
-        const SizedBox(height: 16),
+        const SectionHeader("10-Day forecast"),
+        const SizedBox(height: AuraSpacing.md),
         SizedBox(
           height: 180,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: dailyData.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
+            separatorBuilder: (context, index) =>
+                const SizedBox(width: AuraSpacing.sm),
             itemBuilder: (context, index) {
               final forecast = dailyData[index];
               final isToday = index == 0; // Assuming first item is today
 
-              return Container(
+              return WeatherSurfaceCard(
                 width: 80,
-                decoration: BoxDecoration(
-                  color: isToday
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : Theme.of(context).colorScheme.surfaceContainer,
-                  borderRadius: BorderRadius.circular(40), // Pill shape
-                  border: isToday
-                      ? Border.all(color: Theme.of(context).colorScheme.primary, width: 2)
-                      : null,
+                borderRadius: AuraRadii.pill,
+                emphasized: isToday,
+                padding: const EdgeInsets.symmetric(
+                  vertical: AuraSpacing.lg,
+                  horizontal: AuraSpacing.xs,
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       forecast.dayOfWeek,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+                        fontWeight: isToday
+                            ? FontWeight.bold
+                            : FontWeight.normal,
                       ),
                     ),
-                    Icon(_getIconForCondition(forecast.icon)),
+                    getWeatherIcon(forecast.icon, size: 32),
                     if (forecast.pop > 0)
                       Text(
-                        '\${forecast.pop}%',
+                        '${forecast.pop}%',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.bold,
@@ -64,16 +59,18 @@ class DailyForecastCard extends StatelessWidget {
                     Column(
                       children: [
                         Text(
-                          '\${forecast.tempMax}°',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          '${forecast.tempMax}°',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         Text(
-                          '\${forecast.tempMin}°',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
+                          '${forecast.tempMin}°',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ],
                     ),
@@ -85,20 +82,5 @@ class DailyForecastCard extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  IconData _getIconForCondition(String iconName) {
-    switch (iconName.toLowerCase()) {
-      case 'sunny':
-        return Icons.wb_sunny;
-      case 'cloudy':
-        return Icons.cloud;
-      case 'partly_cloudy':
-        return Icons.wb_cloudy;
-      case 'rain':
-        return Icons.water_drop;
-      default:
-        return Icons.cloud;
-    }
   }
 }

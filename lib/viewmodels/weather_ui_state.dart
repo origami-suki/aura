@@ -5,6 +5,8 @@ import '../models/weather_daily.dart';
 import '../models/indices.dart';
 
 class WeatherUiState {
+  static const Object _unset = Object();
+
   final bool isLoading;
   final String? errorMessage;
   final LocationResponse? location;
@@ -13,6 +15,9 @@ class WeatherUiState {
   final List<DailyForecast> dailyForecast;
   final AqiNow? aqiNow;
   final List<IndexInfo> indices;
+  final List<CitySearchResult> citySearchResults;
+  final bool isSearchingCities;
+  final String? citySearchError;
 
   WeatherUiState({
     this.isLoading = true,
@@ -23,27 +28,44 @@ class WeatherUiState {
     this.dailyForecast = const [],
     this.aqiNow,
     this.indices = const [],
+    this.citySearchResults = const [],
+    this.isSearchingCities = false,
+    this.citySearchError,
   });
 
   WeatherUiState copyWith({
     bool? isLoading,
-    String? errorMessage,
-    LocationResponse? location,
-    WeatherNow? weatherNow,
+    Object? errorMessage = _unset,
+    Object? location = _unset,
+    Object? weatherNow = _unset,
     List<HourlyForecast>? hourlyForecast,
     List<DailyForecast>? dailyForecast,
-    AqiNow? aqiNow,
+    Object? aqiNow = _unset,
     List<IndexInfo>? indices,
+    List<CitySearchResult>? citySearchResults,
+    bool? isSearchingCities,
+    Object? citySearchError = _unset,
   }) {
     return WeatherUiState(
       isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? this.errorMessage,
-      location: location ?? this.location,
-      weatherNow: weatherNow ?? this.weatherNow,
+      errorMessage: identical(errorMessage, _unset)
+          ? this.errorMessage
+          : errorMessage as String?,
+      location: identical(location, _unset)
+          ? this.location
+          : location as LocationResponse?,
+      weatherNow: identical(weatherNow, _unset)
+          ? this.weatherNow
+          : weatherNow as WeatherNow?,
       hourlyForecast: hourlyForecast ?? this.hourlyForecast,
       dailyForecast: dailyForecast ?? this.dailyForecast,
-      aqiNow: aqiNow ?? this.aqiNow,
+      aqiNow: identical(aqiNow, _unset) ? this.aqiNow : aqiNow as AqiNow?,
       indices: indices ?? this.indices,
+      citySearchResults: citySearchResults ?? this.citySearchResults,
+      isSearchingCities: isSearchingCities ?? this.isSearchingCities,
+      citySearchError: identical(citySearchError, _unset)
+          ? this.citySearchError
+          : citySearchError as String?,
     );
   }
 }
